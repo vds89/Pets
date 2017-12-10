@@ -126,18 +126,20 @@ public class EditorActivity extends AppCompatActivity {
 
     private void insertPet(){
         try {
-
+            // Read from input fields
+            // Use trim to eliminate leading or trailing white space
             String nameString = mNameEditText.getText().toString().trim();
             String breeString = mBreedEditText.getText().toString().trim();
             int weightInt = Integer.parseInt(mWeightEditText.getText().toString().trim());
 
-            //Instantiate the data repository
+            // Create database helper
             mDbHelper = new PetDbHelper(this);
 
             // Gets the data repository in write mode
             SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-            // Create a new map of values, where column names are the keys
+            // Create a ContentValues object where column names are the keys,
+            // and pet attributes from the editor are the values.
             ContentValues values = new ContentValues();
 
             values.put(PetContract.PetEntry.COLUMN_PET_NAME, nameString);
@@ -148,6 +150,7 @@ public class EditorActivity extends AppCompatActivity {
             // Insert the new row, returning the primary key value of the new row
             long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
 
+            // Show a toast message depending on whether or not the insertion was successful
             if (newRowId < 0) {
                 Context context = getApplicationContext();
                 CharSequence text = "Error with saving pet";
@@ -155,6 +158,7 @@ public class EditorActivity extends AppCompatActivity {
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
             } else {
+                // Otherwise, the insertion was successful and we can display a toast with the row ID.
                 Context context = getApplicationContext();
                 CharSequence text = "Pet saved with ID " + newRowId;
                 int duration = Toast.LENGTH_SHORT;
@@ -164,6 +168,7 @@ public class EditorActivity extends AppCompatActivity {
                 Log.v("EditorActivity", "New row ID " + newRowId);
             }
         }catch (Exception e){
+            // Otherwise, the insertion was successful and we can display a toast with the row ID.
             Context context = getApplicationContext();
             CharSequence text = "Error with saving pet";
             int duration = Toast.LENGTH_SHORT;

@@ -74,9 +74,32 @@ public class CatalogActivity extends AppCompatActivity {
         // Create and/or open a database to read from it, like .open "databasename.db" in SQLite
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        // Perform this raw SQL query "SELECT * FROM pets"
-        // to get a Cursor that contains all rows from the pets table.
-        Cursor cursor = db.rawQuery("SELECT * FROM " + PetContract.PetEntry.TABLE_NAME, null);
+        // Define a projection that specifies which columns from the database
+        // you will actually use after this query.
+        String[] projection = {
+                PetContract.PetEntry._ID,
+                PetContract.PetEntry.COLUMN_PET_NAME,
+                PetContract.PetEntry.COLUMN_PET_BREED,
+                PetContract.PetEntry.COLUMN_PET_GENDER,
+                PetContract.PetEntry.COLUMN_PET_WEIGHT
+        };
+
+
+        // Filter results WHERE "name" = 'Toto'
+        //String selection = PetContract.PetEntry.COLUMN_PET_NAME + " = ?";
+        //String[] selectionArgs = {"Toto"};
+
+        // Perform this SQL query
+        Cursor cursor = db.query(
+                PetContract.PetEntry.TABLE_NAME,       // The table to query
+                projection,                            // The columns to return
+                null,                                  // The columns for the WHERE clause
+                null,                                  // The values for the WHERE clause
+                null,                                  // don't group the rows
+                null,                                  // don't filter by row groups
+                null                                   // The sort order
+        );
+
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
@@ -114,7 +137,7 @@ public class CatalogActivity extends AppCompatActivity {
         // Insert the new row, returning the primary key value of the new row
         long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
 
-        Log.v("CatalogAcivity", "New row ID " + newRowId);
+        Log.v("CatalogActivity", "New row ID " + newRowId);
     }
 
     @Override
