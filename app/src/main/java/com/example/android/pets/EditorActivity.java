@@ -18,6 +18,7 @@ package com.example.android.pets;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +37,8 @@ import com.example.android.pets.data.PetContract;
 import com.example.android.pets.data.PetDbHelper;
 
 import java.io.IOException;
+
+import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
 
 /**
  * Allows user to create a new pet or edit an existing one.
@@ -59,9 +62,6 @@ public class EditorActivity extends AppCompatActivity {
      * 0 for unknown gender, 1 for male, 2 for female.
      */
     private int mGender = 0;
-
-    private PetDbHelper mDbHelper;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,18 +125,12 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void insertPet(){
-        try {
+
             // Read from input fields
             // Use trim to eliminate leading or trailing white space
             String nameString = mNameEditText.getText().toString().trim();
             String breeString = mBreedEditText.getText().toString().trim();
             int weightInt = Integer.parseInt(mWeightEditText.getText().toString().trim());
-
-            // Create database helper
-            mDbHelper = new PetDbHelper(this);
-
-            // Gets the data repository in write mode
-            SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
             // Create a ContentValues object where column names are the keys,
             // and pet attributes from the editor are the values.
@@ -147,38 +141,25 @@ public class EditorActivity extends AppCompatActivity {
             values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender);
             values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, weightInt);
 
-            // Insert the new row, returning the primary key value of the new row
-            long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
+            // Defines a new Uri object that receives the result of the insertion
+            Uri mNewUri = getContentResolver().insert(
+                    CONTENT_URI,                        // the user PetEntry content URI
+                    values                              // the values to insert
+            );
+
 
             // Show a toast message depending on whether or not the insertion was successful
-            if (newRowId < 0) {
-                Context context = getApplicationContext();
-                CharSequence text = "Error with saving pet";
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
+            if (mNewUri == null) {
+                // If the new content URI is null, then there was an error with insertion.
+                Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
+                        Toast.LENGTH_SHORT).show();
             } else {
-                // Otherwise, the insertion was successful and we can display a toast with the row ID.
-                Context context = getApplicationContext();
-                CharSequence text = "Pet saved with ID " + newRowId;
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
-
-                Log.v("EditorActivity", "New row ID " + newRowId);
+                // Otherwise, the insertion was successful and we can display a toast.
+                Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
+                        Toast.LENGTH_SHORT).show();
             }
-        }catch (Exception e){
-            // Otherwise, the insertion was successful and we can display a toast with the row ID.
-            Context context = getApplicationContext();
-            CharSequence text = "Error with saving pet";
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-
-            Log.e("EditorActivity", "Error with saving pet");
-
-        }
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

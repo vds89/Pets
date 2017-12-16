@@ -16,9 +16,11 @@
 package com.example.android.pets;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -27,9 +29,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract;
-import com.example.android.pets.data.PetDbHelper;
 
 import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
 
@@ -37,8 +39,6 @@ import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
  * Displays list of pets that were entered and stored in the app.
  */
 public class CatalogActivity extends AppCompatActivity {
-
-    private PetDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +55,6 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-        mDbHelper = new PetDbHelper(this);
     }
 
     @Override
@@ -69,12 +68,6 @@ public class CatalogActivity extends AppCompatActivity {
      * the pets database.
      */
     private void displayDatabaseInfo() {
-        // To access our database, we instantiate our subclass of SQLiteOpenHelper
-        // and pass the context, which is the current activity.
-        PetDbHelper mDbHelper = new PetDbHelper(this);
-
-        // Create and/or open a database to read from it, like .open "databasename.db" in SQLite
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
@@ -165,9 +158,6 @@ public class CatalogActivity extends AppCompatActivity {
 
     private void insertPet(){
 
-        // Gets the data repository in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
 
@@ -177,9 +167,19 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, "7 kg");
 
         // Insert the new row, returning the primary key value of the new row
-        long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
+        //long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
 
-        Log.v("CatalogActivity", "New row ID " + newRowId);
+        // Defines a new Uri object that receives the result of the insertion
+        Uri mNewUri = getContentResolver().insert(
+                CONTENT_URI,                        // the user PetEntry content URI
+                values                              // the values to insert
+        );
+        if (mNewUri != null){
+            // The insertion was successful and we can display a toast.
+                        Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
+                                Toast.LENGTH_SHORT).show();
+        }
+        //Log.v("CatalogActivity", "New row ID " + newRowId);
     }
 
     @Override
