@@ -31,6 +31,8 @@ import android.widget.TextView;
 import com.example.android.pets.data.PetContract;
 import com.example.android.pets.data.PetDbHelper;
 
+import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
+
 /**
  * Displays list of pets that were entered and stored in the app.
  */
@@ -90,7 +92,7 @@ public class CatalogActivity extends AppCompatActivity {
         //String[] selectionArgs = {"Toto"};
 
         // Perform this SQL query
-        Cursor cursor = db.query(
+        /** Cursor cursor = db.query(
                 PetContract.PetEntry.TABLE_NAME,       // The table to query
                 projection,                            // The columns to return
                 null,                                  // The columns for the WHERE clause
@@ -99,6 +101,9 @@ public class CatalogActivity extends AppCompatActivity {
                 null,                                  // don't filter by row groups
                 null                                   // The sort order
         );
+        */
+
+        Cursor cursor = getContentResolver().query(CONTENT_URI,projection,null,null,null);
 
         TextView displayView = (TextView) findViewById(R.id.text_view_pet);
 
