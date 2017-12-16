@@ -103,6 +103,7 @@ public class CatalogActivity extends AppCompatActivity {
         );
         */
 
+        //Content provider query method call
         Cursor cursor = getContentResolver().query(CONTENT_URI,projection,null,null,null);
 
         TextView displayView = (TextView) findViewById(R.id.text_view_pet);
