@@ -130,7 +130,8 @@ public class EditorActivity extends AppCompatActivity {
             // Use trim to eliminate leading or trailing white space
             String nameString = mNameEditText.getText().toString().trim();
             String breeString = mBreedEditText.getText().toString().trim();
-            int weightInt = Integer.parseInt(mWeightEditText.getText().toString().trim());
+            String weightString = mWeightEditText.getText().toString().trim();
+            int weightInt = Integer.parseInt(weightString);
 
             // Create a ContentValues object where column names are the keys,
             // and pet attributes from the editor are the values.
@@ -176,6 +177,7 @@ public class EditorActivity extends AppCompatActivity {
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
                 // Do nothing for now
+
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:

@@ -79,23 +79,6 @@ public class CatalogActivity extends AppCompatActivity {
                 PetContract.PetEntry.COLUMN_PET_WEIGHT
         };
 
-
-        // Filter results WHERE "name" = 'Toto'
-        //String selection = PetContract.PetEntry.COLUMN_PET_NAME + " = ?";
-        //String[] selectionArgs = {"Toto"};
-
-        // Perform this SQL query
-        /** Cursor cursor = db.query(
-                PetContract.PetEntry.TABLE_NAME,       // The table to query
-                projection,                            // The columns to return
-                null,                                  // The columns for the WHERE clause
-                null,                                  // The values for the WHERE clause
-                null,                                  // don't group the rows
-                null,                                  // don't filter by row groups
-                null                                   // The sort order
-        );
-        */
-
         //Content provider query method call
         Cursor cursor = getContentResolver().query(CONTENT_URI,projection,null,null,null);
 
