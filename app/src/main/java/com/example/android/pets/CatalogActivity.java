@@ -15,20 +15,26 @@
  */
 package com.example.android.pets;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,7 +45,14 @@ import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
 /**
  * Displays list of pets that were entered and stored in the app.
  */
-public class CatalogActivity extends AppCompatActivity {
+public class CatalogActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
+
+    // Identifies a particular Loader being used in this component
+    private static final int PET_LOADER = 0;
+
+    // This is the Adapter being used to display the list's data
+    PetCursorAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,18 +69,35 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
+        // Find the ListView which will be populated with the pet data
+        ListView petListView = (ListView) findViewById(R.id.list);
+
+        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
+        View emptyView = findViewById(R.id.empty_view);
+        petListView.setEmptyView(emptyView);
+
+        // Setup cursor adapter using null cursor
+        mAdapter = new PetCursorAdapter(this, null);
+        // Sets the adapter for the view
+        petListView.setAdapter(mAdapter);
+
+
+        // Prepare the loader.  Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(PET_LOADER, null, this);
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        displayDatabaseInfo();
     }
 
     /**
      * Temporary helper method to display information in the onscreen TextView about the state of
      * the pets database.
      */
+    /**
     private void displayDatabaseInfo() {
 
         // Define a projection that specifies which columns from the database
@@ -100,7 +130,7 @@ public class CatalogActivity extends AppCompatActivity {
         petAdapter.changeCursor(cursor);
 
     }
-
+    */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -143,7 +173,6 @@ public class CatalogActivity extends AppCompatActivity {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
                 insertPet();
-                displayDatabaseInfo();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
@@ -151,5 +180,51 @@ public class CatalogActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle) {
+
+        // Define a projection that specifies which columns from the database
+        // you will actually use after this query.
+        String[] PROJECTION = {
+                PetContract.PetEntry._ID,
+                PetContract.PetEntry.COLUMN_PET_NAME,
+                PetContract.PetEntry.COLUMN_PET_BREED
+        };
+
+            /*
+     * Takes action based on the ID of the Loader that's being created
+     */
+        switch (loaderID) {
+            case PET_LOADER:
+                // Now create and return a CursorLoader that will take care of
+                // creating a Cursor for the data being displayed.
+                return new CursorLoader(this, PetContract.PetEntry.CONTENT_URI,
+                        PROJECTION, null, null, null);
+
+            default:
+                // An invalid id was passed in
+                return null;
+        }
+
+    }
+
+    @Override
+    // Called when a previously created loader has finished loading
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        mAdapter.swapCursor(cursor);
+
+    }
+
+    @Override
+    // Called when a previously created loader is reset, making the data unavailable
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no
+        // longer using it.
+        mAdapter.swapCursor(null);
     }
 }
