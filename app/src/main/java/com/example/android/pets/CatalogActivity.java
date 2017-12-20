@@ -93,45 +93,6 @@ public class CatalogActivity extends AppCompatActivity implements
         super.onStart();
     }
 
-    /**
-     * Temporary helper method to display information in the onscreen TextView about the state of
-     * the pets database.
-     */
-    /**
-    private void displayDatabaseInfo() {
-
-        // Define a projection that specifies which columns from the database
-        // you will actually use after this query.
-        String[] projection = {
-                PetContract.PetEntry._ID,
-                PetContract.PetEntry.COLUMN_PET_NAME,
-                PetContract.PetEntry.COLUMN_PET_BREED,
-                PetContract.PetEntry.COLUMN_PET_GENDER,
-                PetContract.PetEntry.COLUMN_PET_WEIGHT
-        };
-
-        //Content provider query method call
-        Cursor cursor = getContentResolver().query(CONTENT_URI,projection,null,null,null);
-
-        // Find the ListView which will be populated with the pet data
-        ListView petListView = (ListView) findViewById(R.id.list);
-
-        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
-        View emptyView = findViewById(R.id.empty_view);
-        petListView.setEmptyView(emptyView);
-
-        // Setup cursor adapter using cursor from last step
-        PetCursorAdapter petAdapter = new PetCursorAdapter(this, cursor);
-
-        // Attach cursor adapter to the ListView
-        petListView.setAdapter(petAdapter);
-
-        // Switch to new cursor and update contents of ListView
-        petAdapter.changeCursor(cursor);
-
-    }
-    */
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu options from the res/menu/menu_catalog.xml file.

@@ -91,6 +91,7 @@ public class PetProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
 
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
 
@@ -144,6 +145,9 @@ public class PetProvider extends ContentProvider {
         if (newRowId == -1) {
             Log.e(LOG_TAG, "Failed to insert row for " + uri);
             return null;
+        }
+        if (newRowId != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
         }
         // Once we know the ID of the new row in the table,
         // return the new URI with the ID appended to the end of it
@@ -221,6 +225,10 @@ public class PetProvider extends ContentProvider {
                 selection,                          // the column to select on
                 selectionArgs                       // the value to compare to
         );
+
+        if (mRowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         // Returns the number of database rows affected by the update statement
         return mRowsUpdated;
     }
@@ -233,16 +241,26 @@ public class PetProvider extends ContentProvider {
         // Get writable database
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
+        int mRowsDeleted = 0;
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case PETS:
+                if (mRowsDeleted != 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
                 // Delete all rows that match the selection and selection args
-                return database.delete(PetContract.PetEntry.TABLE_NAME, selection, selectionArgs);
+                mRowsDeleted = database.delete(PetContract.PetEntry.TABLE_NAME, selection, selectionArgs);
+                return mRowsDeleted;
             case PET_ID:
                 // Delete a single row given by the ID in the URI
                 selection = PetContract.PetEntry._ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
-                return database.delete(PetContract.PetEntry.TABLE_NAME, selection, selectionArgs);
+
+                if (mRowsDeleted != 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                mRowsDeleted = database.delete(PetContract.PetEntry.TABLE_NAME, selection, selectionArgs);
+                return mRowsDeleted;
             default:
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }
