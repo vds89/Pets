@@ -16,6 +16,7 @@
 package com.example.android.pets;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -32,6 +33,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -40,6 +42,8 @@ import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract;
 
+import static com.example.android.pets.data.PetContract.BASE_CONTENT_URI;
+import static com.example.android.pets.data.PetContract.PATH_PETS;
 import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
 
 /**
@@ -80,6 +84,26 @@ public class CatalogActivity extends AppCompatActivity implements
         mAdapter = new PetCursorAdapter(this, null);
         // Sets the adapter for the view
         petListView.setAdapter(mAdapter);
+
+        //Set up the click listener
+        petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+
+                // Get the Intent that started Editor activity
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+
+                //Form the content URI that represent the soecific pet that was clicked on,
+                //by appending the "id" (passed as an input to this method) onto the
+                //{@link PetEntry#CONTENT_URI}.
+                //For example, the URI will be content://com.example.android.pets/pets/2
+                //if the pet with ID=2 was clicked on
+                intent.setData(ContentUris.withAppendedId(CONTENT_URI, id));
+
+                // Send the intent to launch a new activity
+                startActivity(intent);
+            }
+        });
 
 
         // Prepare the loader.  Either re-connect with an existing one,

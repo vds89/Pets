@@ -63,11 +63,24 @@ public class EditorActivity extends AppCompatActivity {
      */
     private int mGender = 0;
 
+
+    /** Tag for log messages */
+    private static final String LOG_TAG = EditorActivity.class.getName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
+        Uri uri = this.getIntent().getData();
+
+        Log.e(LOG_TAG, "*******************Passed URI is:" + uri);
+
+        if(uri != null) {
+            setTitle(R.string.editor_activity_title_edit_pet);
+        }else {
+            setTitle(R.string.editor_activity_title_new_pet);
+        }
         // Find all relevant views that we will need to read user input from
         mNameEditText = (EditText) findViewById(R.id.edit_pet_name);
         mBreedEditText = (EditText) findViewById(R.id.edit_pet_breed);
