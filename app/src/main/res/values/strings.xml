@@ -35,6 +35,15 @@
     <!-- Toast message in editor when current pet has failed to be updated [CHAR LIMIT=NONE] -->
     <string name="editor_update_missing_text">Please make sure to compile the required fields</string>
 
+    <!-- Dialog message when user is leaving editor but hasn't saved changes [CHAR LIMIT=NONE] -->
+    <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
+
+    <!-- Dialog button text for the option to discard a user's changes [CHAR LIMIT=20] -->
+    <string name="discard">Discard</string>
+
+    <!-- Dialog button text for the option to keep editing the current pet [CHAR LIMIT=20] -->
+    <string name="keep_editing">Keep Editing</string>
+
     <!-- Label for editor menu option to save pet and leave editor [CHAR LIMIT=20] -->
     <string name="action_save">Save</string>
 
@@ -82,4 +91,6 @@
 
     <!-- Subtitle text for the empty view that prompts the user to add a pet [CHAR LIMIT=50] -->
     <string name="empty_view_subtitle_text">Get started by adding a pet</string>
+
+
 </resources>
