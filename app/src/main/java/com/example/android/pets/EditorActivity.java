@@ -15,8 +15,12 @@
  */
 package com.example.android.pets;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,12 +42,15 @@ import com.example.android.pets.data.PetDbHelper;
 
 import java.io.IOException;
 
+import static com.example.android.pets.data.PetContract.PetEntry.COLUMN_PET_GENDER;
+import static com.example.android.pets.data.PetContract.PetEntry.COLUMN_PET_WEIGHT;
 import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
 
 /**
  * Allows user to create a new pet or edit an existing one.
  */
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     /** EditText field to enter the pet's name */
     private EditText mNameEditText;
@@ -57,6 +64,11 @@ public class EditorActivity extends AppCompatActivity {
     /** EditText field to enter the pet's gender */
     private Spinner mGenderSpinner;
 
+    /** Loader initialization  */
+    private static final int PET_LOADER = 0;
+
+    /** Content URI for the existing pet (null if it's a new pet) */
+    private Uri mCurrentPetUri;
     /**
      * Gender of the pet. The possible values are:
      * 0 for unknown gender, 1 for male, 2 for female.
@@ -72,11 +84,11 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
-        Uri uri = this.getIntent().getData();
+        mCurrentPetUri = this.getIntent().getData();
 
-        Log.e(LOG_TAG, "*******************Passed URI is:" + uri);
+        Log.e(LOG_TAG, "*******************Passed URI is:" + mCurrentPetUri);
 
-        if(uri != null) {
+        if(mCurrentPetUri != null) {
             setTitle(R.string.editor_activity_title_edit_pet);
         }else {
             setTitle(R.string.editor_activity_title_new_pet);
@@ -88,6 +100,8 @@ public class EditorActivity extends AppCompatActivity {
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
         setupSpinner();
+
+        getLoaderManager().initLoader(PET_LOADER, null, this);
     }
 
     /**
@@ -199,5 +213,95 @@ public class EditorActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle) {
+        // Since the editor shows all pet attributes, define a projection that contains.
+        // all columns from the pet table
+        String[] PROJECTION = {
+                PetContract.PetEntry._ID,
+                PetContract.PetEntry.COLUMN_PET_NAME,
+                PetContract.PetEntry.COLUMN_PET_BREED,
+                PetContract.PetEntry.COLUMN_PET_GENDER,
+                PetContract.PetEntry.COLUMN_PET_WEIGHT
+        };
+
+            /*
+     * Takes action based on the ID of the Loader that's being created
+     */
+        switch (loaderID) {
+            case PET_LOADER:
+                // Now create and return a CursorLoader that will take care of
+                // creating a Cursor for the data being displayed.
+                // This loader will execute the ContentProvider's query method on
+                // a background thread
+                return new CursorLoader(this,   // Parent activity context
+                        mCurrentPetUri,         // Query the content URI for the current pet
+                        PROJECTION,             // Columns to include in the resulting Cursor
+                        null,                   // No selection clause
+                        null,                   // No selection arguments
+                        null                    // Default sort order
+                );
+
+            default:
+                // An invalid id was passed in
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+         // Bail early if the cursor is null or there is less than 1 row in the cursor
+         if (cursor == null || cursor.getCount() < 1) {
+             return;
+         }
+        // Proceed with moving to the first row of the cursor and reading data from it
+        // (This should be the only row in the cursor)
+        if(cursor.moveToFirst()) {
+
+            // Find the columns of pet attributes that we're interested in
+            int nameColumnIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_NAME);
+            int breedColumnIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_BREED);
+            int genderColumnIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_GENDER);
+            int weightColumnIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_WEIGHT);
+
+            // Extract out the value from the Cursor for the given column index
+            String currentName = cursor.getString(nameColumnIndex);
+            String currentBreed = cursor.getString(breedColumnIndex);
+            int currentGender = cursor.getInt(genderColumnIndex);
+            int currentWeight = cursor.getInt(weightColumnIndex);
+
+
+            Log.e(LOG_TAG, "*******************NAME is:" + currentName);
+            // Update the views on the screen with the values from the database
+            mNameEditText.setText(currentName);
+            mBreedEditText.setText(currentBreed);
+            mWeightEditText.setText(Integer.toString(currentWeight));
+
+            // Gender is a dropdown spinner, so map the constant value from the database
+            // into one of the dropdown options (0 is Unknown, 1 is Male, 2 is Female).
+            // Then call setSelection() so that option is displayed on screen as the current selection.
+            switch (currentGender) {
+                case PetContract.PetEntry.GENDER_MALE:
+                    mGenderSpinner.setSelection(1);
+                    break;
+                case PetContract.PetEntry.GENDER_FEMALE:
+                    mGenderSpinner.setSelection(2);
+                    break;
+                default:
+                    mGenderSpinner.setSelection(0);
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // If the loader is invalidated, clear out all the data from the input fields.
+        mNameEditText.setText("");
+        mBreedEditText.setText("");
+        mWeightEditText.setText("");
+        mGenderSpinner.setSelection(0); // Select "Unknown" gender
     }
 }
