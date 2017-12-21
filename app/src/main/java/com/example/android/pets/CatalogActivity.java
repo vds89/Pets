@@ -87,13 +87,15 @@ public class CatalogActivity extends AppCompatActivity implements
 
         //Set up the click listener
         petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            //When a Pet in the list is clicked on, open its Edit Tab
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 
                 // Get the Intent that started Editor activity
                 Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
 
-                //Form the content URI that represent the soecific pet that was clicked on,
+                //Form the content URI that represent the specific pet that was clicked on,
                 //by appending the "id" (passed as an input to this method) onto the
                 //{@link PetEntry#CONTENT_URI}.
                 //For example, the URI will be content://com.example.android.pets/pets/2
