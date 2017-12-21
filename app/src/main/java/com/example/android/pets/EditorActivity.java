@@ -149,7 +149,21 @@ public class EditorActivity extends AppCompatActivity implements
         String nameString = mNameEditText.getText().toString().trim();
         String breedString = mBreedEditText.getText().toString().trim();
         String weightString = mWeightEditText.getText().toString().trim();
-        int weight = Integer.parseInt(weightString);
+
+        //Return if no data are inserted in the mandatory TextEdit fields
+        if(mCurrentPetUri == null || nameString.isEmpty() || weightString.isEmpty()
+                || mGender == PetEntry.GENDER_UNKNOWN){
+            Toast.makeText(this, getString(R.string.editor_update_missing_text),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // If the weight is not provided by the user, don't try to parse the string into an
+        // integer value. Use 0 by default.
+        int weight = 0;
+        if (!TextUtils.isEmpty(weightString)) {
+            weight = Integer.parseInt(weightString);
+        }
 
         // Create a ContentValues object where column names are the keys,
         // and pet attributes from the editor are the values.

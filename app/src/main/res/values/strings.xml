@@ -32,6 +32,9 @@
     <!-- Toast message in editor when current pet has failed to be updated [CHAR LIMIT=NONE] -->
     <string name="editor_update_pet_failed">Error with updating pet</string>
 
+    <!-- Toast message in editor when current pet has failed to be updated [CHAR LIMIT=NONE] -->
+    <string name="editor_update_missing_text">Please make sure to compile the required fields</string>
+
     <!-- Label for editor menu option to save pet and leave editor [CHAR LIMIT=20] -->
     <string name="action_save">Save</string>
 
