@@ -89,6 +89,18 @@ public class EditorActivity extends AppCompatActivity implements
      */
     private boolean mPetHasChanged = false;
 
+    /**
+     * OnTouchListener that listens for any user touches on a View, implying that they are modifying
+     * the view, and we change the mPetHasChanged boolean to true.
+     */
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            mPetHasChanged = true;
+            return false;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,8 +134,6 @@ public class EditorActivity extends AppCompatActivity implements
         mWeightEditText = (EditText) findViewById(R.id.edit_pet_weight);
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
-        setupSpinner();
-
         // Setup OnTouchListeners on all the input fields, so we can determine if the user
         // has touched or modified them. This will let us know if there are unsaved changes
         // or not, if the user tries to leave the editor without saving.
@@ -131,6 +141,9 @@ public class EditorActivity extends AppCompatActivity implements
         mBreedEditText.setOnTouchListener(mTouchListener);
         mWeightEditText.setOnTouchListener(mTouchListener);
         mGenderSpinner.setOnTouchListener(mTouchListener);
+
+        setupSpinner();
+
     }
 
     /**
@@ -183,7 +196,7 @@ public class EditorActivity extends AppCompatActivity implements
         String weightString = mWeightEditText.getText().toString().trim();
 
         //Return if no data are inserted in the mandatory TextEdit fields
-        if (mCurrentPetUri == null || nameString.isEmpty() || weightString.isEmpty()
+        if (nameString.isEmpty() || weightString.isEmpty()
                 || mGender == PetEntry.GENDER_UNKNOWN) {
             Toast.makeText(this, getString(R.string.editor_update_missing_text),
                     Toast.LENGTH_SHORT).show();
@@ -242,17 +255,6 @@ public class EditorActivity extends AppCompatActivity implements
         }
     }
 
-    /**
-     * OnTouchListener that listens for any user touches on a View, implying that they are modifying
-     * the view, and we change the mPetHasChanged boolean to true.
-     */
-    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            mPetHasChanged = true;
-            return false;
-        }
-    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -273,6 +275,7 @@ public class EditorActivity extends AppCompatActivity implements
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // User clicked on a menu option in the app bar overflow menu
@@ -286,7 +289,8 @@ public class EditorActivity extends AppCompatActivity implements
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                // Do nothing for now
+                //Trigger the delete confirmation dialog
+                showDeleteConfirmationDialog();
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -314,6 +318,7 @@ public class EditorActivity extends AppCompatActivity implements
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     /**
      * This method is called when the back button is pressed.
@@ -441,5 +446,65 @@ public class EditorActivity extends AppCompatActivity implements
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+
+    private void showDeleteConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the postivie and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete" button, so delete the pet.
+                deletePet();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the pet.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Perform the deletion of the pet in the database.
+     */
+    private void deletePet() {
+
+        // Only perform the delete if this is an existing pet.
+        if (mCurrentPetUri != null) {
+            // Call the ContentResolver to delete the pet at the given content URI.
+            // Pass in null for the selection and selection args because the mCurrentPetUri
+            // content URI already identifies the pet that we want.
+
+            // Deletes the pet that match the selection criteria
+            int mRowsDeleted = getContentResolver().delete(
+                    mCurrentPetUri,                     // the user dictionary content URI
+                    null,                    // the column to select on
+                    null                      // the value to compare to
+            );
+
+            // Show a toast message depending on whether or not the update was successful.
+            if (mRowsDeleted == 0) {
+                // If no rows were affected, then there was an error with the update.
+                Toast.makeText(this, getString(R.string.editor_delete_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the update was successful and we can display a toast.
+                Toast.makeText(this, getString(R.string.editor_delete_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+        // Close the activity
+        finish();
     }
 }

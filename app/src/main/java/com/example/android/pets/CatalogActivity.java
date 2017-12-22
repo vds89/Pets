@@ -42,6 +42,7 @@ import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract;
 
+import static android.text.TextUtils.isEmpty;
 import static com.example.android.pets.data.PetContract.BASE_CONTENT_URI;
 import static com.example.android.pets.data.PetContract.PATH_PETS;
 import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
@@ -153,6 +154,29 @@ public class CatalogActivity extends AppCompatActivity implements
         //Log.v("CatalogActivity", "New row ID " + newRowId);
     }
 
+    private void deleteAllPets(){
+
+        // Call the ContentResolver to delete ALL the pet in the table.
+
+        // Deletes the pet that match the selection criteria
+        int mRowsDeleted = getContentResolver().delete(
+                PetContract.PetEntry.CONTENT_URI,                     // the user dictionary content URI
+                null,                    // the column to select on
+                null                      // the value to compare to
+        );
+
+        // Show a toast message depending on whether or not the update was successful.
+        if (mRowsDeleted == 0) {
+            // If no rows were affected, then there was an error with the update.
+            Toast.makeText(this, getString(R.string.editor_delete_pet_failed),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            // Otherwise, the update was successful and we can display a toast.
+            Toast.makeText(this, getString(R.string.editor_deleteAll_pet_successful),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // User clicked on a menu option in the app bar overflow menu
@@ -163,7 +187,7 @@ public class CatalogActivity extends AppCompatActivity implements
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                deleteAllPets();
                 return true;
         }
         return super.onOptionsItemSelected(item);
